@@ -20,32 +20,44 @@
 # This software is distributed under the 3-clause BSD License
 # ______________________________________________________________________________
 
-from gettext import install
-from os import strerror
-from pickle import TRUE
+#import pprint
+#import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import pprint
-import matplotlib.pyplot as plt
 import datetime
 
 import pyomo.environ as pyo
 
 # organize data using the data file and user input product and component headers
-def organize_data_for_product_family_design(info):
+def _get_data_from_csv(csv_filepath, process_variant_columns, shared_component_columns,
+                       feasibility_column, annualized_cost_column, num_shared_component_designs):
     """
     Organize raw data from a csv file into the sets for PFD optimization.
     This is based on specified product headers & component headers passed by the user.
-    Inputs:
-        -- info: (dict) dictionary containing all data & headers info, with following entries
+
+    Args:
+       csv_filepath : str
+          location of csv file containing the data
+       process_variant_columns : list of str
+          list of column names corresponding to the variables that define the boundary conditiosn for the 
+          process variant
+       TODO: finish documentation
+            - 'unit headers':           list[(string)]      list of names corresponding to unit headers in csv file
+            - 'success header':         string              name corresponding to success header in csv file
+            - 'cost header':            string              name corresponding to cost header in csv file
+            - 'units manufactured':     list[int]           number of each unit type user wants to allow for manufacturing
+       info : dict
+          Dictionary containing information to read the input csv
             - 'data location':          string              location of csv file
             - 'installation headers':   list[(string)]      list of names corresponding to installation headers in csv file 
             - 'unit headers':           list[(string)]      list of names corresponding to unit headers in csv file
             - 'success header':         string              name corresponding to success header in csv file
             - 'cost header':            string              name corresponding to cost header in csv file
             - 'units manufactured':     list[int]           number of each unit type user wants to allow for manufacturing
+
     Returns: 
-        -- sets: (dict) dicionary containing organized sets, with following entries
+        dict 
+           Returns a dictionary containing organized sets, with following entries
             - 'data':       pandas df           raw data
             - 'K':          list[string]        list of names corresponding to all unit types to be designed commonly
             - 'S_k':        dict{k:[]}          dictionary, indexed by unit type k, which corresponds to a list of designs for that unit
@@ -54,56 +66,59 @@ def organize_data_for_product_family_design(info):
             - 'Q_a':        dict{a:[]}          dictionary, indexed by alternative a, which corresponds to a list of tuples corresponding to (k,s) in the alt.
             - 'alpha_ia':   dict{(i,a):c}       dictionary, indexed by installation i, alternative a, corresponding to the cost of that alternative at the installation.
             - 'N_k':        dict{k:int}         dictionary, indexed by unit k, corresponding to the number of designs we want for that unit k
-
     """
 
     # SPLIT DATA 
 
     # read data from csv file into panda dictionary
-    data = pd.read_csv(info['data location'])
+    data = pd.read_csv(csv_filepath)
 
     # grab data we need, organize into arrays
-    installation_details = np.vstack( [ data[p] for p in info['installation headers'] ] ).T
-    unit_details = np.vstack( [ data[c] for c in info['unit headers'] ] ).T
-    cost = np.array( data[info['cost header']] )
-    success = np.array( data[info['success header']] )
+    installation_details = np.vstack( [ data[p] for p in process_variant_columns ] ).T
+    unit_details = np.vstack( [ data[c] for c in shared_component_columns ] ).T
+    cost = np.array( data[annualized_cost_column] )
+    success = np.array( data[feasibility_column] )
+    n_rows = len(success)
+    assert n_rows == installation_details.shape[0]
+    assert n_rows == unit_details.shape[0]
+    assert n_rows == len(cost)
 
-    # ORGANIZE INTO NECESSARY SETS 
+    # get the size options for each shared component
+    S_k = { nm:sorted( set( unit_details[:,k] ) ) for k,nm in enumerate(shared_component_columns) }
 
-    # get the size options for each componet
-    S_k = { info['unit headers'][k]:sorted( set( unit_details[:,k] ) ) for k in range( len( info['unit headers'] ) )}
+    # get the set of all possible process variants from the data
+    I = map(tuple,installation_details.tolist()) # list of tuples of all combinations in the csv file
+    I = sorted(set(I)) # sorted set of unique tuples
 
-    # get product design variances
-    I = sorted( set(map(tuple,installation_details.tolist())))
-
-    # set of feasible alternatives for each products
+    # set of feasible alternatives for each process variant
     A_i = {i:[] for i in I}
     alpha_ia = {}
 
     # loop through data to store alternatives & costs
-    for row in range(len(success)):
-
+    for row in range(n_rows):
         # grab & store alternative data and cost data
         installation_specs = tuple(installation_details[row])
         unit_specs = tuple(unit_details[row])
-        alpha_ia[ tuple(installation_specs + unit_specs) ] = cost[row]
+        ia = installation_specs + unit_specs # concatenate process variant and shared component tuples
+        alpha_ia[ ia ] = cost[row]
 
         # alternative is only stored if success = True
         if success[row] == True:
             A_i[installation_specs].append(unit_specs)
 
-    # Q_a = all components that are utilized within a particular alternative
-    Q_a = {a: [tuple( (info['unit headers'][x], a[x]) ) for x in range(len(info['unit headers']))]\
-                 for i in I for a in A_i[i] }
+    # Q_a = list of tuples of (shared_component_name, size) for all shared components that are utilized within a particular alternative
+    # Each entry in Q_a should be the same length as the number of shared components
+    Q_a = dict()
+    for r in range(n_rows):
+        Q_a[tuple(unit_details[r])] = [ (nm,unit_details[r][k]) for k,nm in enumerate(shared_component_columns) ]
 
     # specify number of each component type to manufacture
-    N_k = {}
-    for unit in range(len(info['unit headers'])):
-        N_k[info['unit headers'][unit]] = info['units manufactured'][unit]
+    assert sorted(shared_component_columns) == sorted(num_shared_component_designs.keys())
+    N_k = dict(num_shared_component_designs)
 
     # create dict of sets as return
     sets = {
-        'K': info['unit headers'],
+        'K': list(shared_component_columns),
         'S_k': S_k,
         'I': I,
         'A_i': A_i,
@@ -113,17 +128,20 @@ def organize_data_for_product_family_design(info):
     }  
 
     # check that data makes sense
-    check_data(data,info,sets)
+    # TODO: uncomment once check data is cleaned up
+    # check_data(data,info,sets)
 
     return sets
 
-
+# TODO: clean up check_data
 def check_data(data, info, sets):
     """
     Check data & constructed sets.
-    Inputs:
-        -- info:    dict    dictionary containing all data & headers info
-        -- sets:    dict    dicionary containing organized sets
+    Args:
+       info : dict
+          Dictionary containing information to read the input csv (see :meth:`organize_data_for_product_family_design`)
+       sets : dict
+          Dictionary containing the sets and parameters to create the model
     Returns:
         -- None.
     """
@@ -173,7 +191,7 @@ def check_data(data, info, sets):
             sets['A_i'].pop(i)
 
 
-def build_product_family_design_pyomo_model(sets):
+def _build_discretized_formulation_pyomo_model(sets):
     """
     Builds pyomo model for the discretized product family design problem.
     Inputs: 
@@ -183,6 +201,7 @@ def build_product_family_design_pyomo_model(sets):
     """
 
     model = pyo.ConcreteModel()
+    model.sets = sets
 
     # indices for x_ia
     x_ia_indices = [ tuple( (i,a) ) for i in sets['I'] for a in sets['A_i'][i] ]
@@ -221,12 +240,11 @@ def build_product_family_design_pyomo_model(sets):
     return model
 
 
-def solve_product_family_design_pyomo_model(model, sets, show='True', save_results_to=None, solver='glpk'):
+def solve_product_family_design_pyomo_model(model, show='True', save_results_to=None, solver='glpk'):
     """
     Solves pyomo model for the discretized product family design problem.
     Inputs: 
         -- model:               Pyomo model     Pyomo model
-        -- sets:                dict            dictionary containing organized sets
         -- show:                bool            indicator for printing solution to terminal or not
         -- save_results_to      string          location of csv file to save results to
         -- solver:              string          name of solver. 
@@ -253,11 +271,11 @@ def solve_product_family_design_pyomo_model(model, sets, show='True', save_resul
 
 
     # create dict to hold selected alt for each installation i
-    sol={i:[] for i in sets['I']}
+    sol={i:[] for i in model.sets['I']}
 
     # loop through each installation & alternative to grab which was selected
-    for i in sets['I']:
-        for a in sets['A_i'][i]:
+    for i in model.sets['I']:
+        for a in model.sets['A_i'][i]:
 
             if pyo.value(model.x_ia[i,a] >= 0.9):
                 sol[i] = a
@@ -272,74 +290,26 @@ def solve_product_family_design_pyomo_model(model, sets, show='True', save_resul
     
     return [model,sol]
 
+def build_discretized_mip(csv_filepath, process_variant_columns, shared_component_columns,
+                       feasibility_column, annualized_cost_column, num_shared_component_designs):
 
-def plot_results(sol, info, sets):
     """
-    Plots results of a solved Pyomo model.
-    Inputs: 
-        -- sol:     dict            dictionary containing organized results of Pyomo model
-        -- info:    dict            dictionary containing all data & headers info
-        -- sets:    dict            dictionary containing organized sets
-    Returns:
-        None.
+    TODO: document this from _get_data_from_csv and reference this one for that function
     """
-    # check that installation characters are = 2 otw plotting does not work.
-    total_num_installation_characteristics=len(info['installation headers'])
-    if total_num_installation_characteristics!=2:
-        print('Cannot create a 2D plot with', str(total_num_installation_characteristics), 'installation descriptor')
-        quit()
-
-    # set font to times new roman and size = 12
-    plt.rc('font', family='times new roman')
-    plt.rcParams['font.size'] = 12
-
-    fig = plt.figure( figsize= (6.5, 5.25) )
-    ax = fig.add_subplot() 
-    color_options = ['r', 'b', 'g', 'c', 'y', 'm', 'k']
-
-    # find total number of alternatives we are offering
-    total_alternative = []
-    for i in sets['I']:
-        total_alternative.append(sol[i])
-    total_alternative = list(set(total_alternative))
-
-    for i in sets['I']:
-        label_name = ''
-        for unit in range(len(sets['K'])):
-
-            # get the label name
-            label_name += sets['K'][unit] + '=' + str(sol[i][unit]) +'\n'
-
-        # find the index of the current alternative in the total alternatives list
-        alt_index = total_alternative.index(sol[i])
-
-        # plot the point, with the color corresponding to the index / color relationship, and the current label
-        plt.scatter( i[0], i[1], marker = 'o', s = 100, color = color_options[alt_index], label = label_name )
-
-    # make sure there are no duplicate entries in the legend
-    def legend_without_duplicate_labels(figure):
-        handles, labels = plt.gca().get_legend_handles_labels()
-        by_label = dict(zip(labels, handles))
-        figure.legend(by_label.values(), by_label.keys(), bbox_to_anchor=(1.4, 0.9))
-    
-    # create a legend w/o duplicates
-    legend_without_duplicate_labels(fig)
-
-    # axis labels
-    ax.set_xlabel(info['installation headers'][0], fontsize = 18)
-    ax.set_ylabel(info['installation headers'][1], fontsize = 18)
-
-
+    sets = _get_data_from_csv(csv_filepath, process_variant_columns, shared_component_columns,
+                       feasibility_column, annualized_cost_column, num_shared_component_designs)
+    model_instance = _build_discretized_formulation_pyomo_model(sets)
+    return model_instance
 
 if __name__ == '__main__':
 
     # elect which test to run
-    test_1=False
+    test_1=True
     test_2=False
     test_3=False
     test_4=False
     test_5=False
-    test_6=True
+    test_6=False
 
     # DIFFERENT HVAC DATASET SPLITS
     
@@ -348,35 +318,35 @@ if __name__ == '__main__':
         print('Test 1: Small Example: 42 data points from Refrigeration Dataset')
         print('\t1 shared evaporator with 6 designs.')
         print('\t2 installation details, with 1 outside air temperature and 7 capacities')
-        data_file = "data\\hvac_datasets\\hvac_data_42pts.csv"
-        installation_details_headers = ['Capacity']
-        unit_headers = ['Evaporator Area']
-        success_header = ['Success']
-        cost_header = ['Total Cost']
-        num_each_component_to_select = [2]
-        test_results_file='test_results\\test_1_results.txt'
+        csv_filepath = "tests/data/rfr_data_42pts.csv"
+        process_variant_columns = ['Capacity']
+        shared_component_columns = ['Evaporator Area']
+        feasibility_column = ['Success']
+        annualized_cost_column = ['Total Cost']
+        num_shared_component_designs = {'Evaporator Area': 2}
+        test_results_file='tests/test_1_results.txt'
 
     # test 2: medium refrigeration data (336 data points, 1 unit, 2 products (8 OAT x 7 CAP))
     if test_2:
         print('Test 2: Medium Example: 336 data points from Refrigeration Dataset')
-        data_file = "data\\\hvac_datasets\\hvac_data_336pts.csv"
-        installation_details_headers = ['Capacity', 'Outside Air Temperature']
-        unit_headers = ['Evaporator Area']
-        success_header = ['Success']
-        cost_header = ['Total Cost']
-        num_each_component_to_select = [2]
+        csv_filepath = "data\\\hvac_datasets\\hvac_data_336pts.csv"
+        process_variant_columns = ['Capacity', 'Outside Air Temperature']
+        shared_component_columns = ['Evaporator Area']
+        feasibility_column = ['Success']
+        annualized_cost_column = ['Total Cost']
+        num_shared_component_designs = {'Evaporator Area': 2}
         test_results_file='test_results\\test_2_results.txt'
 
     
     # test 3: full refrigeration data (78,400 data points, 3 units, 2 products (8 OAT x 7 CAP))
     if test_3:
         print('Test 2: Full (78,400pts) Refrigeration Dataset')
-        data_file = "data\\hvac_datasets\\hvac_data.csv"
-        installation_details_headers = ['Capacity', 'Outside Air Temperature']
-        unit_headers = ['Evaporator Area', 'Condenser Area', 'Compressor Design Flow']
-        success_header = ['Success']
-        cost_header = ['Total Cost']
-        num_each_component_to_select = [2, 2, 2]
+        csv_filepath = "data\\hvac_datasets\\hvac_data.csv"
+        process_variant_columns = ['Capacity', 'Outside Air Temperature']
+        shared_component_columns = ['Evaporator Area', 'Condenser Area', 'Compressor Design Flow']
+        feasibility_column = ['Success']
+        annualized_cost_column = ['Total Cost']
+        num_shared_component_designs = {'Evaporator Area': 2, 'Condenser Area': 2, 'Compressor Design Flow': 2}
         test_results_file='test_results\\test_3_results.txt'
 
     # MEA FACILITY DATASET
@@ -384,12 +354,12 @@ if __name__ == '__main__':
     # test 4: MEA carbon capture facility data (no heat exchanger)
     if test_4:
         print('Test 4: MEA Carbon Capture Facility Dataset')
-        data_file = "data\\MEA_carbon_capture_data.csv"
-        installation_details_headers = ['Inlet Flow (kg/hr) ', 'Inlet CO2 MassFrac']
-        unit_headers = ['Absorber Packing Diameter (m)', 'Stripper Packing Diameter (m)']
-        success_header = ['All Bounds Met']
-        cost_header = ['Total Cost of Plant']
-        num_each_component_to_select = [3, 2]
+        csv_filepath = "data\\MEA_carbon_capture_data.csv"
+        process_variant_columns = ['Inlet Flow (kg/hr) ', 'Inlet CO2 MassFrac']
+        shared_component_columns = ['Absorber Packing Diameter (m)', 'Stripper Packing Diameter (m)']
+        feasibility_column = ['All Bounds Met']
+        annualized_cost_column = ['Total Cost of Plant']
+        num_shared_component_designs = {'Absorber Packing Diameter (m)':3, 'Stripper Packing Diameter (m)': 2}
         test_results_file='test_results\\test_4_results.txt'
 
     # TESTING SOME WONKY CASES
@@ -400,40 +370,33 @@ if __name__ == '__main__':
         print('\tUsing: 42 data points from Refrigeration Dataset, where CAP=200, OAT=35 has no alternatives.')
         print('\t1 shared evaporator with 6 designs.')
         print('\t2 installation details, with 1 outside air temperature and 7 capacities.\n')
-        data_file = "data\\wonky_datasets\\hvac_data_42pts_no_alternatives.csv"
-        installation_details_headers = ['Capacity', 'Outside Air Temperature']
-        unit_headers = ['Evaporator Area']
-        success_header = ['Success']
-        cost_header = ['Total Cost']
-        num_each_component_to_select = [2]
+        csv_filepath = "data\\wonky_datasets\\hvac_data_42pts_no_alternatives.csv"
+        process_variant_columns = ['Capacity', 'Outside Air Temperature']
+        shared_component_columns = ['Evaporator Area']
+        feasibility_column = ['Success']
+        annualized_cost_column = ['Total Cost']
+        num_shared_component_designs = {'Evaporator Area': 2}
         test_results_file='test_results\\test_5_results.txt'
 
     # test 6: incorrect dataset
     if test_6:
         print('Test 6: Dataset is incorrect in size.')
         print('\tUsing: 42 data points from Refrigeration Dataset, with a couple of data points removed.')
-        data_file = "data\\wonky_datasets\\hvac_data_42pts_incorrect_dataset.csv"
-        installation_details_headers = ['Capacity', 'Outside Air Temperature']
-        unit_headers = ['Evaporator Area']
-        success_header = ['Success']
-        cost_header = ['Total Cost']
-        num_each_component_to_select = [2]
+        csv_filepath = "data\\wonky_datasets\\hvac_data_42pts_incorrect_dataset.csv"
+        process_variant_columns = ['Capacity', 'Outside Air Temperature']
+        shared_component_columns = ['Evaporator Area']
+        feasibility_column = ['Success']
+        annualized_cost_column = ['Total Cost']
+        num_shared_component_designs = {'Evaporator Area': 2}
         test_results_file='test_results\\test_6_results.txt'
     
-
-    info = {
-        'data location': data_file,
-        'installation headers': installation_details_headers,
-        'unit headers': unit_headers,
-        'success header': success_header,
-        'cost header': cost_header,
-        'units manufactured': num_each_component_to_select # need this to specify Nk
-    }
-
-    sets = organize_data_for_product_family_design(info)
-    model_instance = build_product_family_design_pyomo_model(sets)
+    model_instance = build_discretized_mip(csv_filepath=csv_filepath,
+                                           process_variant_columns=process_variant_columns,
+                                           shared_component_columns=shared_component_columns,
+                                           feasibility_column=feasibility_column,
+                                           annualized_cost_column=annualized_cost_column,
+                                           num_shared_component_designs=num_shared_component_designs)
+    
     solved_model, sol = solve_product_family_design_pyomo_model(model_instance, 
-                                                                sets, 
                                                                 save_results_to=test_results_file, 
                                                                 solver='gurobi')
-    plot_results(sol, info, sets)
