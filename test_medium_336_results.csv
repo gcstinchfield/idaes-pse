@@ -1,0 +1,454 @@
+Date: 11/3/2022
+Time: 10:11:53
+
+Total Annualized Cost = [4397045.02976]
+
+The assignments of alternatives to installation are:
+
+Installation :
+	Capacity=80
+	Outside Air Temperature=28
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=80
+	Outside Air Temperature=29
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=80
+	Outside Air Temperature=30
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=80
+	Outside Air Temperature=31
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=80
+	Outside Air Temperature=32
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=80
+	Outside Air Temperature=33
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=80
+	Outside Air Temperature=34
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=80
+	Outside Air Temperature=35
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=100
+	Outside Air Temperature=28
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=100
+	Outside Air Temperature=29
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=100
+	Outside Air Temperature=30
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=100
+	Outside Air Temperature=31
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=100
+	Outside Air Temperature=32
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=100
+	Outside Air Temperature=33
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=100
+	Outside Air Temperature=34
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=100
+	Outside Air Temperature=35
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=120
+	Outside Air Temperature=28
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=120
+	Outside Air Temperature=29
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=120
+	Outside Air Temperature=30
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=120
+	Outside Air Temperature=31
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=120
+	Outside Air Temperature=32
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=120
+	Outside Air Temperature=33
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=120
+	Outside Air Temperature=34
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=120
+	Outside Air Temperature=35
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=140
+	Outside Air Temperature=28
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=140
+	Outside Air Temperature=29
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=140
+	Outside Air Temperature=30
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=140
+	Outside Air Temperature=31
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=140
+	Outside Air Temperature=32
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=140
+	Outside Air Temperature=33
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=140
+	Outside Air Temperature=34
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=140
+	Outside Air Temperature=35
+Alternative Selected:
+	Evaporator Area=50
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=160
+	Outside Air Temperature=28
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=160
+	Outside Air Temperature=29
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=160
+	Outside Air Temperature=30
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=160
+	Outside Air Temperature=31
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=160
+	Outside Air Temperature=32
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=160
+	Outside Air Temperature=33
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=160
+	Outside Air Temperature=34
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=160
+	Outside Air Temperature=35
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=180
+	Outside Air Temperature=28
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=180
+	Outside Air Temperature=29
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=180
+	Outside Air Temperature=30
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=180
+	Outside Air Temperature=31
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=180
+	Outside Air Temperature=32
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=180
+	Outside Air Temperature=33
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=180
+	Outside Air Temperature=34
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=180
+	Outside Air Temperature=35
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=200
+	Outside Air Temperature=28
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=200
+	Outside Air Temperature=29
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=200
+	Outside Air Temperature=30
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=200
+	Outside Air Temperature=31
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=200
+	Outside Air Temperature=32
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=200
+	Outside Air Temperature=33
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=200
+	Outside Air Temperature=34
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
+
+Installation :
+	Capacity=200
+	Outside Air Temperature=35
+Alternative Selected:
+	Evaporator Area=80
+	Condenser Area=25
+	Compressor Design Flow=105
