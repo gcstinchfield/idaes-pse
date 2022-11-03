@@ -14,7 +14,7 @@ import sys
 import os
 import pprint
 sys.path.append(os.path.abspath("."))  # current folder is ~/tests
-pprint.pprint(sys.path)
+
 import pytest
 import pyomo.environ as pyo
 
@@ -29,7 +29,9 @@ def test_small_42():
     Tests building & solving discretized formulation for a small refrigeration case
         42 data points, 1 product (7 capacities) and 1 unit type (6 evap sizes)
     """
-    csv_filepath = "./data/rfr_data_42pts.csv"
+    current_path=os.path.dirname(os.path.realpath(__file__))
+    csv_filepath=os.path.join(current_path, "data/rfr_data_42pts.csv" )
+
     process_variant_columns = ['Capacity']
     shared_component_columns = ['Evaporator Area']
     feasibility_column = ['Success']
@@ -52,7 +54,7 @@ def test_small_42():
     sol=create_results_summary(model_instance, process_variant_columns)
 
     assert model_instance is not None
-    assert pyo.value(model_instance.obj)==pytest.approx(549630)
+    assert pyo.value(model_instance.obj)==pytest.approx(549630,abs=1)
 
     assert pyo.value(model_instance.x_ia[((80),(50))])==pytest.approx(1)
     assert pyo.value(model_instance.x_ia[((100),(50))])==pytest.approx(1)
@@ -62,13 +64,17 @@ def test_small_42():
     assert pyo.value(model_instance.x_ia[((180),(80))])==pytest.approx(1)
     assert pyo.value(model_instance.x_ia[((200),(80))])==pytest.approx(1)
 
+@pytest.mark.skipif(not glpk_available, reason="The 'glpk' solver is not available")
+@pytest.mark.unit
 def test_medium_336():
     """
     Tests building & solving discretized formulation for a medium refrigeration case
         336 data points, 2 product2 (7 capacities x 8 outside aire temperares) 
         and 1 unit type (6 evap sizes)
     """
-    csv_filepath = "./data/rfr_data_336pts.csv"
+    current_path=os.path.dirname(os.path.realpath(__file__))
+    csv_filepath=os.path.join(current_path, "data/rfr_data_336pts.csv" )
+
     process_variant_columns = ['Capacity', 'Outside Air Temperature']
     shared_component_columns = ['Evaporator Area', 'Condenser Area', 'Compressor Design Flow']
     feasibility_column = ['Success']
@@ -91,7 +97,7 @@ def test_medium_336():
     sol=create_results_summary(model_instance, process_variant_columns)
 
     assert model_instance is not None
-    assert pyo.value(model_instance.obj)==pytest.approx(4397045)
+    assert pyo.value(model_instance.obj)==pytest.approx(4397045,abs=1)
 
     assert pyo.value(model_instance.x_ia[((80,28),(50,25,105))])==pytest.approx(1)
     assert pyo.value(model_instance.x_ia[((80,29),(50,25,105))])==pytest.approx(1)
@@ -156,7 +162,8 @@ def test_medium_336():
     assert pyo.value(model_instance.x_ia[((200,34),(80,25,105))])==pytest.approx(1)
     assert pyo.value(model_instance.x_ia[((200,35),(80,25,105))])==pytest.approx(1)
 
-
+@pytest.mark.skipif(not glpk_available, reason="The 'glpk' solver is not available")
+@pytest.mark.unit
 def test_missing_alternatives_dataset():
     """
     Tests building & solving discretized formulation when there are no feasible 
@@ -164,8 +171,9 @@ def test_missing_alternatives_dataset():
         42 data points, 1 product (7 capacities) and 1 unit type (6 evap sizes)
         Removed all alternatives for (CAP=200) 
     """
-    csv_filepath = "./data/rfr_data_no_alternatives.csv"
-    process_variant_columns = ['Capacity', 'Outside Air Temperature']
+    current_path=os.path.dirname(os.path.realpath(__file__))
+    csv_filepath=os.path.join(current_path, "data/rfr_data_42pts_no_alternatives.csv" )
+    process_variant_columns = ['Capacity']
     shared_component_columns = ['Evaporator Area']
     feasibility_column = ['Success']
     annualized_cost_column = ['Total Cost']
@@ -187,14 +195,7 @@ def test_missing_alternatives_dataset():
     sol=create_results_summary(model_instance, process_variant_columns)
 
     assert model_instance is not None
-    assert pyo.value(model_instance.obj)==pytest.approx(445634)
-
-    assert pyo.value(model_instance.x_ia[((80),(50))])==pytest.approx(1)
-    assert pyo.value(model_instance.x_ia[((100),(50))])==pytest.approx(1)
-    assert pyo.value(model_instance.x_ia[((120),(50))])==pytest.approx(1)
-    assert pyo.value(model_instance.x_ia[((140),(50))])==pytest.approx(1)
-    assert pyo.value(model_instance.x_ia[((160),(80))])==pytest.approx(1)
-    assert pyo.value(model_instance.x_ia[((180),(80))])==pytest.approx(1)
+    assert pyo.value(model_instance.obj)==pytest.approx(445634, abs=1)
     
     # check that the installation CAP=200 is not included
     for i in model_instance.sets['I']:
